@@ -51,6 +51,8 @@ class ProjectController extends Controller
          }
  
          $project = Project::create($validate_data);
+         $project->technologies()->attach($request->technologies);
+
  
          return to_route('admin.projects.show', $project);
     }
@@ -69,7 +71,8 @@ class ProjectController extends Controller
     public function edit(Project $project)
     {
         $types = Type::all();
-        return view('admin.projects.edit',compact('project', 'types'));
+        $technologies = Technology::all();
+        return view('admin.projects.edit',compact('project', 'types', 'technologies'));
     }
 
     /**
@@ -79,19 +82,19 @@ class ProjectController extends Controller
     {
         $validate_data = $request->validated();
 
-        if ($request->has('cover_image') && $project->cover_image) {
-
-            Storage::delete($project->cover_image);
-
-            $newImageFile = $request->cover_image;
-            $path = Storage::put('projects_thumbs', $newImageFile);
-            //$data['cover_image'] = $path;
+        if ($request->has('cover_image')) {
+            $path = Storage::put('projects_thumbs', $request->cover_image);
             $validate_data['cover_image'] = $path;
         }
 
         if (!Str::is($project->getOriginal('title'), $request->title)) {
 
             $validate_data['slug'] = $project->generateSlug($request->title);
+        }
+
+        if ($request->has('technologies')) {
+            //dd($val_data['tags']);
+            $project->technologies()->sync($validate_data['technologies']);
         }
 
         $project->update($validate_data);
@@ -106,6 +109,8 @@ class ProjectController extends Controller
         if (!is_null($project->cover_image)) {
             Storage::delete($project->cover_image);
         }
+
+        $project->technologies()->detach();
         $project->delete();
         return to_route('admin.projects.index')->with('message', 'Il progetto è stato eliminato correttamente ✅');
     }

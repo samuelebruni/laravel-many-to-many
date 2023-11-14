@@ -38,7 +38,7 @@
 
         <div class="mb-4">
 
-                <label for="type_id" class="form-label">Types </label>
+                <label for="type_id" class="form-label">TYPES 🌟 </label>
                 <select class="form-select @error('type_id') is-invalid  @enderror" name="type_id" id="type_id">
                     <option selected disabled>Select Types 👇</option>
                     <option value="">Uncategorized</option>
@@ -49,6 +49,26 @@
                     @endforelse
 
                 </select>
+
+        </div>
+
+        <div class="mb-4">
+
+            <label for="technologies" class="form-label">TECHNOLOGIES 🤖</label>
+                <select class="form-select" multiple name="technologies[]" id="technologies">
+
+                    <option disabled>Select Technologies👇</option>
+
+                    @foreach ($technologies as $technology)
+                        <option value="{{ $technology->id }}"{{ in_array($technology->id, old('technologies', [])) ? 'selected' : '' }}>
+                            {{ $technology->name }}
+                        </option>
+                    @endforeach
+
+                </select>
+                @error('technologies')
+                    <div class="text-danger">{{ $message }}</div>
+                @enderror
 
         </div>
 
